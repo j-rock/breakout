@@ -1,0 +1,6 @@
+Main-Verify FPS
+    -Swap in Behavior.updateWorld
+
+Behavior-updateWorld
+
+Graphics-drawPaddle
