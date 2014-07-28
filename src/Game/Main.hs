@@ -2,18 +2,18 @@
 
 module Main (main) where
 
+import Control.Monad.IO.Class (liftIO)
+
 import Control.Monad.SFML (runSFML)
 import qualified Control.Monad.SFML.System as S
 import qualified Control.Monad.SFML.Graphics as G
 import SFML.Graphics (RenderWindow)
-import SFML.System.Time (Time, microseconds)
+import SFML.System.Time (Time, microseconds, asSeconds)
 import qualified SFML.Window as W
 
--- import Game.Breakout.Behavior (updateWorld)
+import Game.Breakout.Behavior (updateWorld)
 import Game.Breakout.Types (defaultWorld)
 import Game.Breakout.Graphics (renderWorld)
-
-updateWorld = id
 
 main :: IO ()
 main = runSFML $ do
@@ -30,7 +30,7 @@ defaultContext = do
     let settings = Just $ W.ContextSettings 24 8 0 1 2
         delay    = fps2Micro 60
     window <- G.createRenderWindow
-        (W.VideoMode 640 480 32)
+        (W.VideoMode 640 480 24)
         "Breakout"
         [W.SFDefaultStyle]
         settings
@@ -39,17 +39,19 @@ defaultContext = do
   where fps2Micro = microseconds . floor . (* 1000000) . (1 /) . fromIntegral
 
 gameloop context world = unlessClose (window context) $ do
-    elapsed <- S.restartClock $ clock context
-    sleepMinDelay (delay context) elapsed
+    sleepMinDelay (clock context) (delay context)
     renderWorld world $ window context
     let w' = updateWorld world
     gameloop context w'
 
 unlessClose window action = do
-    event <- G.waitEvent window
+    event <- G.pollEvent window
     case event of
-        Nothing            -> return ()
         Just W.SFEvtClosed -> return ()
         _                  -> action
 
-sleepMinDelay delay elapsed = S.sfSleep $ max 0 (delay - elapsed)
+sleepMinDelay clock delay = do
+    elapsed <- S.restartClock clock
+    S.sfSleep $ max 0 $ delay - elapsed
+    S.restartClock clock
+    return ()

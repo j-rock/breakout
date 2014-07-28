@@ -2,7 +2,7 @@
 
 module Game.Breakout.Types where
 
-import Prelude (Double, Show)
+import Prelude hiding (length)
 
 data World = World
     { paddle :: Paddle
@@ -17,7 +17,8 @@ type BoundingRectangle = (Size, Size)
 
 data Paddle = Paddle
     { pos    :: Position
-    , length :: Size
+    , width  :: Size
+    , height :: Size
     } deriving (Show)
 
 data Ball = Ball
@@ -27,17 +28,19 @@ data Ball = Ball
     } deriving (Show)
 
 defaultWorld = World {paddle, ball, brect}
-  where paddle = defaultPaddle
-        ball   = defaultBall
+  where ball = defaultBall
+        paddle = defaultPaddle
         brect  = defaultBounds
 
-defaultPaddle = Paddle {pos, length}
-  where pos    = (50.0, 1.0)
-        length = 15.0
+defaultPaddle = Paddle {pos, width, height}
+  where pos    = (320.0, 5.1)
+        width  = 55.0
+        height = 3.1
 
 defaultBall = Ball {pos', vel, radius}
-  where pos'   = (50.0, 20.0)
-        vel    = (0.0, 0.0)
-        radius = 60.0
+  where pos'   = (320.0, 120.0)
+        vel    = (-5.0, 5.0)
+        radius = 5.5
+
 
 defaultBounds = (640.0, 480.0)
